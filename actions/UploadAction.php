@@ -34,7 +34,7 @@ class UploadAction extends Action
         if ($this->url === null) {
             throw new InvalidConfigException(Yii::t('cropper', 'MISSING_ATTRIBUTE', ['attribute' => 'url']));
         } else {
-            $this->url = rtrim($this->url, '/');
+            $this->url = rtrim($this->url, '/').'/';
         }
         if ($this->path === null) {
             throw new InvalidConfigException(Yii::t('cropper', 'MISSING_ATTRIBUTE', ['attribute' => 'path']));
