@@ -17,6 +17,7 @@ class UploadAction extends Action
 {
     public $path;
     public $url;
+    public $name;
     public $uploadParam = 'file';
     public $maxSize = 2097152;
     public $extensions = 'jpeg, jpg, png, gif';
@@ -41,6 +42,9 @@ class UploadAction extends Action
         } else {
             $this->path = rtrim(Yii::getAlias($this->path), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         }
+        if ($this->path === null) {
+            throw new InvalidConfigException(Yii::t('cropper', 'MISSING_ATTRIBUTE', ['attribute' => 'hashFile']));
+        }
     }
 
     /**
@@ -63,11 +67,14 @@ class UploadAction extends Action
                     'error' => $model->getFirstError($this->uploadParam)
                 ];
             } else {
-                $model->{$this->uploadParam}->name = uniqid() . '.' . $model->{$this->uploadParam}->extension;
+                
                 $request = Yii::$app->request;
 
                 $width = $request->post('width', $this->width);
                 $height = $request->post('height', $this->height);
+                $name = $request->post('name', $this->name);
+
+                $model->{$this->uploadParam}->name = $name. '.' . $model->{$this->uploadParam}->extension;
 
                 $image = Image::crop(
                     $file->tempName . $request->post('filename'),

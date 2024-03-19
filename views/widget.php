@@ -13,6 +13,7 @@ use yii\helpers\Html;
     <?= Html::activeHiddenInput($model, $widget->attribute, ['class' => 'photo-field']); ?>
     <?= Html::hiddenInput('width', $widget->width, ['class' => 'width-input']); ?>
     <?= Html::hiddenInput('height', $widget->height, ['class' => 'height-input']); ?>
+    <?= Html::hiddenInput('name',  md5($model->Id.'-'.$model->Numero), ['class' => 'name-input']); ?>
     <?= Html::img(
         $model->{$widget->attribute} != ''
             ? $model->{$widget->attribute}

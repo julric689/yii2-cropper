@@ -14,6 +14,7 @@
                 $cropper_buttons: $widget.find('.cropper-buttons'),
                 $width_input: $widget.find('.width-input'),
                 $height_input: $widget.find('.height-input'),
+                $name_input: $widget.find('.name-input'),
                 uploader: null,
                 reader: null,
                 selectedFile: null,
@@ -110,6 +111,7 @@
                             data[yii.getCsrfParam()] = yii.getCsrfToken();
                             data['width'] = cropper.$width_input.val();
                             data['height'] = cropper.$height_input.val();
+                            data['name'] = cropper.$name_input.val();
 
                             if (cropper.uploader._queue.length) {
                                 cropper.selectedFile = cropper.uploader._queue[0];
