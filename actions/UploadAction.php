@@ -74,8 +74,8 @@ class UploadAction extends Action
                 $height = $request->post('height', $this->height);
                 $name = $request->post('name', $this->name);
 
-                $model->{$this->uploadParam}->name = $name. '.' . $model->{$this->uploadParam}->extension;
-
+                //$model->{$this->uploadParam}->name = $name. '.' . $model->{$this->uploadParam}->extension;
+                $model->{$this->uploadParam}->name = $name. '.png';
                 $image = Image::crop(
                     $file->tempName . $request->post('filename'),
                     intval($request->post('w')),
