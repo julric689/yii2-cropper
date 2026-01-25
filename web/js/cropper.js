@@ -83,7 +83,11 @@
                             }
                             cropper.showError('');
 
-                            cropper.$thumbnail.attr({'src': response['filelink']});
+                             let src = response['filelink'];
+                            src += (src.includes('?') ? '&' : '?') + 'v=' + Date.now();
+                            // optionnel : forcer un reload même si le navigateur pense que c'est identique
+                            cropper.$thumbnail.attr('src', '');
+                            cropper.$thumbnail[0].src = src;
                             cropper.$photo_field.val(response['filelink']);
                             if ((typeof options.onCompleteJcrop !== "undefined") && (typeof options.onCompleteJcrop === "string")) {
                                 eval('var onCompleteJcrop = ' + options.onCompleteJcrop);
