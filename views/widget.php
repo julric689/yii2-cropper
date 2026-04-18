@@ -27,7 +27,7 @@ use yii\helpers\Html;
         ); ?>
 
         <div class="cropper-buttons">
-            <button type="button" data-role="cropper-clear" class="btn btn-sm btn-secondary delete-photo" aria-label="<?= Yii::t('cropper', 'DELETE_PHOTO');?>">
+            <button type="button" data-role="cropper-clear" class="btn btn-sm btn-danger delete-photo" aria-label="<?= Yii::t('cropper', 'DELETE_PHOTO');?>">
                 <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> <?= Yii::t('cropper', 'DELETE_PHOTO');?>
             </button>
             <button type="button" class="btn btn-sm btn-success crop-photo d-none" aria-label="<?= Yii::t('cropper', 'CROP_PHOTO');?>">
