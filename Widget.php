@@ -16,6 +16,7 @@ class Widget extends InputWidget
     public $label = '';
     public $uploadUrl;
     public $noPhotoImage = '';
+    public $deleteUrl;
     public $maxSize = 2097152;
     public $thumbnailWidth = 300;
     public $thumbnailHeight = 300;
@@ -72,6 +73,7 @@ class Widget extends InputWidget
 
         $settings = array_merge([
             'url' => $this->uploadUrl,
+            'deleteUrl' => $this->deleteUrl,
             'name' => $this->uploadParameter,
             'maxSize' => $this->maxSize / 1024,
             'allowedExtensions' => explode(', ', $this->extensions),

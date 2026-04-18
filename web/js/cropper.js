@@ -18,6 +18,20 @@
                 uploader: null,
                 reader: null,
                 selectedFile: null,
+                resetPhoto: function () {
+                    cropper.$photo_field.val('');
+                    cropper.$thumbnail.attr({'src': cropper.$thumbnail.data('no-photo')});
+                    cropper.clearOldImg();
+                    cropper.$cropper_buttons.find('.crop-photo, .upload-new-photo').addClass('d-none');
+                    cropper.$cropper_label.removeClass('d-none');
+                    cropper.$progress.addClass('d-none');
+                    cropper.$progress_bar.css({'width': 0});
+                    cropper.selectedFile = null;
+
+                    if (cropper.uploader) {
+                        cropper.uploader._queue = [];
+                    }
+                },
                 init: function () {
                     cropper.reader = new FileReader();
                     cropper.reader.onload = function (e) {
@@ -108,7 +122,35 @@
 
                     cropper.$widget
                         .on('click', '.delete-photo', function () {
-                            cropper.deletePhoto();
+                            if (!options.deleteUrl) {
+                                cropper.resetPhoto();
+                                return;
+                            }
+
+                            if (!cropper.$photo_field.val()) {
+                                cropper.resetPhoto();
+                                return;
+                            }
+
+                            var data = {};
+                            data[yii.getCsrfParam()] = yii.getCsrfToken();
+                            data['photo'] = cropper.$photo_field.val();
+
+                            $.ajax({
+                                url: options.deleteUrl,
+                                type: 'POST',
+                                dataType: 'json',
+                                data: data
+                            }).done(function (response) {
+                                if (response && response['error']) {
+                                    cropper.showError(response['error']);
+                                    return;
+                                }
+                                cropper.showError('');
+                                cropper.resetPhoto();
+                            }).fail(function () {
+                                cropper.showError('La photo n\'a pas pu être supprimée.');
+                            });
                         })
                         .on('click', '.crop-photo', function () {
                             var data = cropper.$img.data('Jcrop').tellSelect();
@@ -148,10 +190,6 @@
                         cropper.$progress.addClass('d-none');
                         cropper.$progress_bar.css({'width': 0});
                     }
-                },
-                deletePhoto: function () {
-                    cropper.$photo_field.val('');
-                    cropper.$thumbnail.attr({'src': cropper.$thumbnail.data('no-photo')});
                 },
                 clearOldImg: function () {
                     if (cropper.$img) {
