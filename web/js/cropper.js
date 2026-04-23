@@ -108,6 +108,11 @@
                                 onCompleteJcrop(filename, response);
                             }
                         },
+                        onError: function (filename, type, status, statusText, response) {
+                            cropper.$progress.addClass('d-none');
+                            cropper.setProgress(0);
+                            cropper.showError('Le transfert de la photo a échoué.');
+                        },
                         onSizeError: function () {
                             cropper.showError(options['size_error_text']);
                             cropper.cropper.setProgress(0);

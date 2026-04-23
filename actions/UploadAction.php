@@ -53,54 +53,63 @@ class UploadAction extends Action
     public function run()
     {
         if (Yii::$app->request->isPost) {
-            $file = UploadedFile::getInstanceByName($this->uploadParam);
-            $model = new DynamicModel(compact($this->uploadParam));
-            $model->addRule($this->uploadParam, 'image', [
-                'maxSize' => $this->maxSize,
-                'tooBig' => Yii::t('cropper', 'TOO_BIG_ERROR', ['size' => $this->maxSize / (1024 * 1024)]),
-                'extensions' => explode(', ', $this->extensions),
-                'wrongExtension' => Yii::t('cropper', 'EXTENSION_ERROR', ['formats' => $this->extensions])
-            ])->validate();
+            try {
+                $file = UploadedFile::getInstanceByName($this->uploadParam);
+                if ($file === null) {
+                    throw new \RuntimeException(Yii::t('cropper', 'ERROR_CAN_NOT_UPLOAD_FILE'));
+                }
 
-            if ($model->hasErrors()) {
-                $result = [
-                    'error' => $model->getFirstError($this->uploadParam)
-                ];
-            } else {
-                
-                $request = Yii::$app->request;
+                $model = new DynamicModel(compact($this->uploadParam));
+                $model->addRule($this->uploadParam, 'image', [
+                    'maxSize' => $this->maxSize,
+                    'tooBig' => Yii::t('cropper', 'TOO_BIG_ERROR', ['size' => $this->maxSize / (1024 * 1024)]),
+                    'extensions' => explode(', ', $this->extensions),
+                    'wrongExtension' => Yii::t('cropper', 'EXTENSION_ERROR', ['formats' => $this->extensions])
+                ])->validate();
 
-                $width = $request->post('width', $this->width);
-                $height = $request->post('height', $this->height);
-                $name = $request->post('name', $this->name);
-
-                //$model->{$this->uploadParam}->name = $name. '.' . $model->{$this->uploadParam}->extension;
-                $model->{$this->uploadParam}->name = $name. '.png';
-                $image = Image::crop(
-                    $file->tempName . $request->post('filename'),
-                    intval($request->post('w')),
-                    intval($request->post('h')),
-                    [$request->post('x'), $request->post('y')]
-                )->resize(
-                    new Box($width, $height)
-                );
-
-                if (!file_exists($this->path) || !is_dir($this->path)) {
+                if ($model->hasErrors()) {
                     $result = [
-                        'error' => Yii::t('cropper', 'ERROR_NO_SAVE_DIR')]
-                    ;
+                        'error' => $model->getFirstError($this->uploadParam)
+                    ];
                 } else {
-                    $saveOptions = ['jpeg_quality' => $this->jpegQuality, 'png_compression_level' => $this->pngCompressionLevel];
-                    if ($image->save($this->path . $model->{$this->uploadParam}->name, $saveOptions)) {
+                    $request = Yii::$app->request;
+
+                    $width = $request->post('width', $this->width);
+                    $height = $request->post('height', $this->height);
+                    $name = $request->post('name', $this->name);
+
+                    $model->{$this->uploadParam}->name = $name . '.png';
+                    $image = Image::crop(
+                        $file->tempName,
+                        (int)$request->post('w'),
+                        (int)$request->post('h'),
+                        [(int)$request->post('x'), (int)$request->post('y')]
+                    )->resize(
+                        new Box($width, $height)
+                    );
+
+                    if (!file_exists($this->path) || !is_dir($this->path)) {
                         $result = [
-                            'filelink' => $this->url . $model->{$this->uploadParam}->name
+                            'error' => Yii::t('cropper', 'ERROR_NO_SAVE_DIR')
                         ];
                     } else {
-                        $result = [
-                            'error' => Yii::t('cropper', 'ERROR_CAN_NOT_UPLOAD_FILE')
-                        ];
+                        $saveOptions = ['jpeg_quality' => $this->jpegQuality, 'png_compression_level' => $this->pngCompressionLevel];
+                        if ($image->save($this->path . $model->{$this->uploadParam}->name, $saveOptions)) {
+                            $result = [
+                                'filelink' => $this->url . $model->{$this->uploadParam}->name
+                            ];
+                        } else {
+                            $result = [
+                                'error' => Yii::t('cropper', 'ERROR_CAN_NOT_UPLOAD_FILE')
+                            ];
+                        }
                     }
                 }
+            } catch (\Throwable $e) {
+                Yii::error($e, __METHOD__);
+                $result = [
+                    'error' => Yii::t('cropper', 'ERROR_CAN_NOT_UPLOAD_FILE')
+                ];
             }
             Yii::$app->response->format = Response::FORMAT_JSON;
 
