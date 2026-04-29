@@ -55,10 +55,6 @@ class UploadAction extends Action
         if (Yii::$app->request->isPost) {
             try {
                 $file = UploadedFile::getInstanceByName($this->uploadParam);
-                if ($file === null) {
-                    throw new \RuntimeException(Yii::t('cropper', 'ERROR_CAN_NOT_UPLOAD_FILE'));
-                }
-
                 $model = new DynamicModel(compact($this->uploadParam));
                 $model->addRule($this->uploadParam, 'image', [
                     'maxSize' => $this->maxSize,
@@ -70,6 +66,10 @@ class UploadAction extends Action
                 if ($model->hasErrors()) {
                     $result = [
                         'error' => $model->getFirstError($this->uploadParam)
+                    ];
+                } elseif ($file === null) {
+                    $result = [
+                        'error' => Yii::t('cropper', 'ERROR_CAN_NOT_UPLOAD_FILE')
                     ];
                 } else {
                     $request = Yii::$app->request;
@@ -93,7 +93,10 @@ class UploadAction extends Action
                             'error' => Yii::t('cropper', 'ERROR_NO_SAVE_DIR')
                         ];
                     } else {
-                        $saveOptions = ['jpeg_quality' => $this->jpegQuality, 'png_compression_level' => $this->pngCompressionLevel];
+                        $saveOptions = [
+                            'jpeg_quality' => $this->jpegQuality,
+                            'png_compression_level' => $this->pngCompressionLevel
+                        ];
                         if ($image->save($this->path . $model->{$this->uploadParam}->name, $saveOptions)) {
                             $result = [
                                 'filelink' => $this->url . $model->{$this->uploadParam}->name
